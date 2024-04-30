@@ -1,6 +1,5 @@
 import json
 import FinanceDataReader as fdr
-import pandas as pd
 
 
 kospi = fdr.StockListing("KOSPI")

@@ -13,6 +13,14 @@ for i, key in enumerate(data.keys()):
     )  # Convert "Date" column to datetime
     stock_data = stock_data.set_index("Date")
 
+    stock_data["return"] = stock_data["return"] = (
+        stock_data["Close"].shift(-1) / stock_data["Close"]
+    ) - 1
+    stock_data["return"] = stock_data["return"].shift(-1)
+
+    stock_data["profit"] = 0
+    stock_data.loc[stock_data["return"] > 0, "profit"] = 1
+
     macd_indicator = ta.trend.macd_diff(stock_data["Close"])
 
     # Example: Relative Strength Index (RSI)
@@ -23,12 +31,20 @@ for i, key in enumerate(data.keys()):
     ma20 = stock_data["Close"].rolling(window=20).mean()
     ma60 = stock_data["Close"].rolling(window=60).mean()
 
+    # Calculate Bollinger Bands
+    bb_upper = ta.volatility.bollinger_hband(stock_data["Close"])
+    bb_lower = ta.volatility.bollinger_lband(stock_data["Close"])
+
     # Combine indicators with the original data
     stock_data["MACD"] = macd_indicator
     stock_data["RSI"] = rsi_indicator
     stock_data["MA5"] = ma5
     stock_data["MA20"] = ma20
     stock_data["MA60"] = ma60
+
+    # Add Bollinger Bands to the DataFrame
+    stock_data["BB_Upper"] = bb_upper
+    stock_data["BB_Lower"] = bb_lower
 
     # print(stock_data.tail())
     stock_data.to_csv(f"csv/{i+1}_{key}_data.csv")

@@ -47,5 +47,5 @@ for i, key in enumerate(data.keys()):
     stock_data["BB_Lower"] = bb_lower
 
     # print(stock_data.tail())
-    stock_data.to_csv(f"csv/{i+1}_{key}_data.csv")
+    stock_data.to_csv(f"csv/{(i+1):03}_{key}_data.csv")
     print(f"{i+1}번째 데이터 ({key}) 저장 완료")

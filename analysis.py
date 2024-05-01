@@ -7,19 +7,21 @@ with open("kospi200_close.json", "r") as f:
 
 for i, key in enumerate(data.keys()):
     stock_data = data[key]
+    name = stock_data["Name"]
+    del stock_data["Name"]
     stock_data = pd.DataFrame(stock_data)
     stock_data["Date"] = pd.to_datetime(
         stock_data["Date"]
     )  # Convert "Date" column to datetime
     stock_data = stock_data.set_index("Date")
 
-    stock_data["return"] = stock_data["return"] = (
+    stock_data["Return"] = stock_data["Return"] = (
         stock_data["Close"].shift(-1) / stock_data["Close"]
     ) - 1
-    stock_data["return"] = stock_data["return"].shift(-1)
+    stock_data["Return"] = stock_data["Return"].shift(-1)
 
-    stock_data["profit"] = 0
-    stock_data.loc[stock_data["return"] > 0, "profit"] = 1
+    # stock_data["profit"] = 0
+    # stock_data.loc[stock_data["Return"] > 0, "profit"] = 1
 
     macd_indicator = ta.trend.macd_diff(stock_data["Close"])
 
@@ -45,7 +47,7 @@ for i, key in enumerate(data.keys()):
     # Add Bollinger Bands to the DataFrame
     stock_data["BB_Upper"] = bb_upper
     stock_data["BB_Lower"] = bb_lower
+    stock_data = stock_data[60:-2]
 
-    # print(stock_data.tail())
-    stock_data.to_csv(f"csv/{(i+1):03}_{key}_data.csv")
-    print(f"{i+1}번째 데이터 ({key}) 저장 완료")
+    stock_data.to_csv(f"csv/{(i+1):03}_{name}({key}).csv")
+    print(f"{i+1}번째 좀목 ({name}) 저장 완료")

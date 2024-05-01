@@ -4,14 +4,16 @@ import FinanceDataReader as fdr
 
 kospi = fdr.StockListing("KOSPI")
 kospi200 = kospi.truncate(after=199)
-# print(kospi200)
-stock_code = kospi200["Code"].to_list()
-# print(stock_code)
+print(kospi200)
+stock_code = kospi200[["Name", "Code"]]
+print(stock_code)
 
 kospi200_dict = {}
-for i, code in enumerate(stock_code):
+for i, rows in stock_code.iterrows():
+    code = rows["Code"]
+    name = rows["Name"]
     data = {}
-    df = fdr.DataReader(code, "2020-01-01", "2023-12-31")
+    df = fdr.DataReader(code, "2019-11-15", "2023-12-31")
     # print(df)
 
     df.index = df.index.strftime("%Y-%m-%d")
@@ -23,6 +25,7 @@ for i, code in enumerate(stock_code):
     volume = df["Volume"].to_list()
     change = df["Change"].fillna(0).to_list()
 
+    data["Name"] = name
     data["Date"] = date
     data["Open"] = open_
     data["High"] = high
@@ -32,7 +35,7 @@ for i, code in enumerate(stock_code):
     data["Change"] = change
 
     kospi200_dict[code] = data
-    print(f"{i+1}번째 종목 ({code}) 데이터 저장 완료")
+    print(f"{i+1}번째 종목: {name} ({code}) 데이터 저장 완료")
 
 # print(kospi200_dict)
 

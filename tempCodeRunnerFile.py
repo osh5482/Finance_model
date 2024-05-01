@@ -1,0 +1,1 @@
+print(kospi200)

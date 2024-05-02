@@ -1,21 +1,20 @@
-import glob
-import json
 import numpy as np
 import pandas as pd
 import keras
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 
+plt.rcParams["font.family"] = "Malgun Gothic"
+plt.rcParams["axes.unicode_minus"] = False
+
 
 def check_models(file: str):
     stock_data = pd.read_csv(f"csv/{file}.csv")
-    if len(stock_data["Close"]) < 100:
-        return {file: None}
     dates = pd.to_datetime(stock_data["Date"])
     cols = [
-        "Open",
-        "High",
-        "Low",
+        # "Open",
+        # "High",
+        # "Low",
         "Close",
         "Volume",
         "Change",
@@ -28,6 +27,7 @@ def check_models(file: str):
         "BB_Upper",
         "BB_Lower",
     ]
+
     # save original 'Close' prices for later
     original_close = stock_data["Close"].values
 
@@ -37,77 +37,64 @@ def check_models(file: str):
     # 데이터 정규화
     scaler = StandardScaler()
     scaler = scaler.fit(stock_data)
-    stock_data_scaled = scaler.transform(stock_data)
-
-    # train 데이터와 test 데이터로 분할
-    n_train = int(0.9 * stock_data_scaled.shape[0])
-    test_data_scaled = stock_data_scaled[n_train:]
+    test_data_scaled = scaler.transform(stock_data)
 
     # 날짜 데이터 별도 저장 (미래의 플로팅을 위해)
-    test_dates = dates[n_train:]
+    test_dates = dates  # [n_train:]
 
     # LSTM에 필요한 데이터 형식으로 재구성
-    pred_days = 1
-    seq_len = 30
+    pred_days = 1  # 한번에 예측할 날짜
+    seq_len = 60  # 예측에 쓸 일자
 
-    testX, testY = [], []
+    testX = []
 
     for i in range(seq_len, len(test_data_scaled) - pred_days + 1):
         testX.append(test_data_scaled[i - seq_len : i, :])
-        testY.append(test_data_scaled[i + pred_days - 1 : i + pred_days, 3])
 
-    testX, testY = np.array(testX), np.array(testY)
+    testX = np.array(testX)
 
-    model = keras.models.load_model(f"keras_models/{file}.keras")
+    model = keras.models.load_model(f"keras_models/000_entire_model.keras")
     print("모델을 디스크에서 로드했습니다.")
 
-    # prediction
+    # 예측값 생성
     prediction = model.predict(testX)
 
-    # generate array filled with means for prediction
+    # 예측값을 넣을 배열 생성
     mean_values_pred = np.repeat(
         scaler.mean_[np.newaxis, :], prediction.shape[0], axis=0
     )
 
-    # substitute predictions into the first column
+    # 배열에 예측값 할당
     mean_values_pred[:, 0] = np.squeeze(prediction)
 
-    # inverse transform
+    # 배열을 역정규화
     y_pred = scaler.inverse_transform(mean_values_pred)[:, 0]
 
-    # generate array filled with means for testY
-    mean_values_testY = np.repeat(scaler.mean_[np.newaxis, :], testY.shape[0], axis=0)
-
-    # substitute testY into the first column
-    mean_values_testY[:, 0] = np.squeeze(testY)
-
-    # inverse transform
-    testY_original = scaler.inverse_transform(mean_values_testY)[:, 0]
-
+    # 예측값과 실측값의 오차의 평균
     predict_MSE = np.mean(
-        np.sqrt((testY_original - y_pred) ** 2)
+        abs(original_close[seq_len:] - y_pred)
         / original_close[len(original_close) - len(y_pred) :]
     )
 
     print(f"{file}모델의 주가대비 MSE: {predict_MSE}")
 
     # plotting
-    plt.figure(figsize=(14, 5))
+    plt.figure(figsize=(16, 9))
 
     # plot original 'Close' prices
-    plt.plot(dates, original_close, color="green", label="Original Close Price")
+    plt.plot(
+        dates,
+        original_close,
+        color="green",
+        marker=".",
+        label="Original Close Price",
+    )
 
-    # plot actual vs predicted
-    # plt.plot(
-    #     test_dates[seq_len:],
-    #     testY_original,
-    #     color="blue",
-    #     label="Actual Close Price",
-    # )
     plt.plot(
         test_dates[seq_len:],
         y_pred,
         color="blue",
+        marker=".",
         linestyle="--",
         label="Predicted Close Price",
     )
@@ -133,7 +120,7 @@ def main():
 
     # with open("mse_per.json", "w") as f:
     #     json.dump(mse, f)
-    file = "001_\uc0bc\uc131\uc804\uc790(005930)"
+    file = "001_삼성전자_005930"
     check_models(file)
 
 

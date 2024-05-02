@@ -8,20 +8,23 @@ print(kospi200)
 stock_code = kospi200[["Name", "Code"]]
 print(stock_code)
 
+start = "2023-10-01"
+end = "2024-04-30"
+
 kospi200_dict = {}
 for i, rows in stock_code.iterrows():
     code = rows["Code"]
     name = rows["Name"]
     data = {}
-    df = fdr.DataReader(code, "2019-11-15", "2023-12-31")
+    df = fdr.DataReader(code, start, end)
     # print(df)
 
     df.index = df.index.strftime("%Y-%m-%d")
     date = df.index.to_list()
     open_ = df["Open"].to_list()
-    close = df["Close"].to_list()
     low = df["Low"].to_list()
     high = df["High"].to_list()
+    close = df["Close"].to_list()
     volume = df["Volume"].to_list()
     change = df["Change"].fillna(0).to_list()
 
@@ -39,6 +42,6 @@ for i, rows in stock_code.iterrows():
 
 # print(kospi200_dict)
 
-with open("kospi200_close.json", "w") as f:
+with open(f"kospi200_{start}_{end}.json", "w") as f:
     json.dump(kospi200_dict, f)
     print("json 파일 저장 완료")

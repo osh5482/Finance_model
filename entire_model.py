@@ -5,7 +5,7 @@ import pandas as pd
 import keras
 import tensorflow as tf
 from keras.models import Sequential
-from keras.layers import Input, LSTM, Dense
+from keras.layers import Input, LSTM, Dense, Dropout
 from keras.optimizers import Adam
 from sklearn.preprocessing import StandardScaler
 import time
@@ -40,8 +40,9 @@ def create_models(file_paths: list):
     # LSTM 모델 구축
     model = Sequential()
     model.add(Input(shape=(seq_len, input_dim)))
-    model.add(LSTM(128, return_sequences=True))
-    model.add(LSTM(62, return_sequences=False))
+    model.add(LSTM(64, activation="tanh", return_sequences=True))
+    model.add(Dropout(0.3))
+    model.add(LSTM(32, activation="relu", return_sequences=False))
     model.add(Dense(1))
 
     model.compile(optimizer=Adam(learning_rate=0.01), loss="mse")
@@ -83,7 +84,7 @@ def create_models(file_paths: list):
             batch_size=128,
             validation_split=0.1,
             shuffle=False,
-            verbose=1,
+            verbose=2,
             # callbacks=[early_stopping],
         )
 
@@ -99,10 +100,10 @@ def main():
     file_faths = glob.glob("csv/*.csv")
     create_models(file_faths)
     end = time.perf_counter()
-    sec = round(end - start, 3)
-    m = sec // 60
+    sec = end - start
+    m = int(sec // 60)
     sec = sec % 60
-    print(f"학습 소요 시간: {m}분 {sec}초")
+    print(f"학습 소요 시간: {m}분 {sec:.2f}초")
 
 
 if __name__ == "__main__":

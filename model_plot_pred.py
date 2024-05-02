@@ -9,7 +9,7 @@ plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rcParams["axes.unicode_minus"] = False
 
 pred_days = 1
-seq_len = 30
+seq_len = 14
 cols = [
     "Open",
     "Low",
@@ -97,8 +97,8 @@ def plot_df(dates, stock_data: pd.DataFrame, pred_data_inversed_df: pd.DataFrame
 
 
 def main():
-    file = "169_GS건설_006360"
-    file_path = f"recent_data/{file}.csv"
+    file = "001_삼성전자_005930"
+    file_path = f"csv/{file}.csv"
     stock_data = pd.read_csv(file_path)
     idx, name, code = file.split("_")
     dates = pd.to_datetime(stock_data["Date"])

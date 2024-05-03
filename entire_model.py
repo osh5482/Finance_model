@@ -7,7 +7,7 @@ import tensorflow as tf
 from keras.models import Sequential
 from keras.layers import Input, LSTM, Dense, Dropout
 from keras.optimizers import Adam
-from sklearn.preprocessing import MaxAbsScaler
+from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 import time
 
 tf.random.set_seed(42)
@@ -30,7 +30,7 @@ def create_models(file_paths: list):
         "MA60",
         "BB_Upper",
         "BB_Lower",
-        "UpDown",
+        # "UpDown",
     ]
 
     # LSTM에 필요한 데이터 형식으로 재구성
@@ -44,27 +44,27 @@ def create_models(file_paths: list):
     model.add(LSTM(64, return_sequences=True))
     model.add(Dropout(0.3))
     model.add(LSTM(32, return_sequences=False))
-    model.add(Dense(1, activation="sigmoid"))
+    model.add(Dense(1))
 
     model.compile(optimizer=Adam(learning_rate=0.01), loss="mse")
     model.summary()
 
     early_stopping = keras.callbacks.EarlyStopping(
         monitor="val_loss",  # 모니터링 대상은 'val_loss'
-        patience=8,  # 'val_loss'가 5번 연속으로 개선되지 않을 때 학습 중단
+        patience=8,  # 'val_loss'가 8번 연속으로 개선되지 않을 때 학습 중단
         verbose=2,  # 진행 상황 출력
     )
 
     for file in file_paths:
         stock_data = pd.read_csv(file)
-        file = file[4:-4]
+        file = file[12:-4]
         idx, name, code = file.split("_")
 
         # 새로운 데이터프레임 생성 및 변수형 변환
         stock_data = stock_data[cols].astype(float)
 
         # 데이터 정규화
-        scaler = MaxAbsScaler()
+        scaler = StandardScaler()
         scaler = scaler.fit(stock_data)
         train_data_scaled = scaler.transform(stock_data)
 
@@ -72,7 +72,7 @@ def create_models(file_paths: list):
 
         for i in range(seq_len, len(train_data_scaled) - pred_days + 1):
             trainX.append(train_data_scaled[i - seq_len : i, :])
-            trainY.append(train_data_scaled[i + pred_days - 1 : i + pred_days, -1])
+            trainY.append(train_data_scaled[i + pred_days - 1 : i + pred_days, 3])
 
         trainX, trainY = np.array(trainX), np.array(trainY)
         # testX, testY = np.array(testX), np.array(testY)
@@ -86,20 +86,20 @@ def create_models(file_paths: list):
             batch_size=256,
             validation_split=0.1,
             shuffle=False,
-            verbose=2,
+            verbose=1,
             # callbacks=[early_stopping],
         )
 
         print(f"{idx}번째 종목 {name} ({code}) 학습 완료")
 
         # 훈련 후 모델 저장
-    model.save(f"keras_models/000_entire_boolean.keras")
+    model.save(f"keras_models/000_entire_close_post.keras")
     print(f"모델 저장 완료")
 
 
 def main():
     start = time.perf_counter()
-    file_faths = glob.glob("csv/*.csv")
+    file_faths = glob.glob("post_corona/*.csv")
     create_models(file_faths)
     end = time.perf_counter()
     sec = end - start

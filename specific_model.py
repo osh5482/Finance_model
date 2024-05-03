@@ -53,7 +53,7 @@ def create_models(file: str):
 
     for i in range(seq_len, len(stock_data_scaled) - pred_days + 1):
         trainX.append(stock_data_scaled[i - seq_len : i, :])
-        trainY.append(stock_data_scaled[i + pred_days - 1 : i + pred_days, 0])
+        trainY.append(stock_data_scaled[i + pred_days - 1 : i + pred_days, 3])
 
     trainX, trainY = np.array(trainX), np.array(trainY)
 
@@ -64,7 +64,7 @@ def create_models(file: str):
     model.add(LSTM(32, return_sequences=False))
     model.add(Dense(1))  # 예측하고자 하는 값은 'Close' 가격이므로 Dense(1) 사용
 
-    model.compile(optimizer=Adam(learning_rate=0.1), loss="mse")
+    model.compile(optimizer=Adam(learning_rate=0.01), loss="mse")
 
     history = model.fit(
         trainX,

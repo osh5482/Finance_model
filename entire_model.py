@@ -7,7 +7,7 @@ import tensorflow as tf
 from keras.models import Sequential
 from keras.layers import Input, LSTM, Dense, Dropout
 from keras.optimizers import Adam
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MaxAbsScaler
 import time
 
 tf.random.set_seed(42)
@@ -30,6 +30,7 @@ def create_models(file_paths: list):
         "MA60",
         "BB_Upper",
         "BB_Lower",
+        "UpDown",
     ]
 
     # LSTM에 필요한 데이터 형식으로 재구성
@@ -40,16 +41,17 @@ def create_models(file_paths: list):
     # LSTM 모델 구축
     model = Sequential()
     model.add(Input(shape=(seq_len, input_dim)))
-    model.add(LSTM(64, activation="tanh", return_sequences=True))
+    model.add(LSTM(64, return_sequences=True))
     model.add(Dropout(0.3))
-    model.add(LSTM(32, activation="relu", return_sequences=False))
-    model.add(Dense(1))
+    model.add(LSTM(32, return_sequences=False))
+    model.add(Dense(1, activation="sigmoid"))
 
     model.compile(optimizer=Adam(learning_rate=0.01), loss="mse")
+    model.summary()
 
     early_stopping = keras.callbacks.EarlyStopping(
         monitor="val_loss",  # 모니터링 대상은 'val_loss'
-        patience=5,  # 'val_loss'가 5번 연속으로 개선되지 않을 때 학습 중단
+        patience=8,  # 'val_loss'가 5번 연속으로 개선되지 않을 때 학습 중단
         verbose=2,  # 진행 상황 출력
     )
 
@@ -62,7 +64,7 @@ def create_models(file_paths: list):
         stock_data = stock_data[cols].astype(float)
 
         # 데이터 정규화
-        scaler = StandardScaler()
+        scaler = MaxAbsScaler()
         scaler = scaler.fit(stock_data)
         train_data_scaled = scaler.transform(stock_data)
 
@@ -70,7 +72,7 @@ def create_models(file_paths: list):
 
         for i in range(seq_len, len(train_data_scaled) - pred_days + 1):
             trainX.append(train_data_scaled[i - seq_len : i, :])
-            trainY.append(train_data_scaled[i + pred_days - 1 : i + pred_days, 3])
+            trainY.append(train_data_scaled[i + pred_days - 1 : i + pred_days, -1])
 
         trainX, trainY = np.array(trainX), np.array(trainY)
         # testX, testY = np.array(testX), np.array(testY)
@@ -81,7 +83,7 @@ def create_models(file_paths: list):
             trainX,
             trainY,
             epochs=32,
-            batch_size=128,
+            batch_size=256,
             validation_split=0.1,
             shuffle=False,
             verbose=2,
@@ -91,7 +93,7 @@ def create_models(file_paths: list):
         print(f"{idx}번째 종목 {name} ({code}) 학습 완료")
 
         # 훈련 후 모델 저장
-    model.save(f"keras_models/000_entire_model_all.keras")
+    model.save(f"keras_models/000_entire_boolean.keras")
     print(f"모델 저장 완료")
 
 

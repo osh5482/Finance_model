@@ -66,6 +66,7 @@ for i, key in enumerate(data.keys()):
     stock_data["MA60"] = ma60
     stock_data["BB_Upper"] = bb_upper
     stock_data["BB_Lower"] = bb_lower
+    stock_data["UpDown"] = (stock_data["Return"] > 0).astype(int)
 
     # NaN값 제외를 위한 슬라이싱
     stock_data = stock_data[60:-2]

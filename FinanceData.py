@@ -8,8 +8,8 @@ print(kospi200)
 stock_code = kospi200[["Name", "Code"]]
 print(stock_code)
 
-start = "2023-10-01"
-end = "2024-04-30"
+start = "2020-01-01"
+end = "2023-12-31"
 
 kospi200_dict = {}
 for i, rows in stock_code.iterrows():

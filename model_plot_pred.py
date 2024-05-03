@@ -2,7 +2,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import keras
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 import matplotlib.pyplot as plt
 
 plt.rcParams["font.family"] = "Malgun Gothic"
@@ -25,9 +25,10 @@ cols = [
     "MA60",
     "BB_Upper",
     "BB_Lower",
+    "UpDown",
 ]
 
-scaler = StandardScaler()
+scaler = MaxAbsScaler()
 
 
 def file_process(stock_data: pd.DataFrame):
@@ -52,7 +53,7 @@ def file_process(stock_data: pd.DataFrame):
 
 def run_model(testX: np.ndarray):
     """정규화된 데이터를 모델에 입력해 예측값을 출력합니다"""
-    model = keras.models.load_model(f"keras_models/000_entire_model_all.keras")
+    model = keras.models.load_model(f"keras_models/000_entire_boolean.keras")
     prediction = model.predict(testX)
 
     return prediction
@@ -64,7 +65,7 @@ def add_data(pred_data: np.ndarray):
     print(pred_data.shape)
 
     dummy = np.zeros((len(pred_data), scaler.scale_.shape[0]))
-    dummy[:, 3] = pred_data.reshape(-1)
+    dummy[:, -1] = pred_data.reshape(-1)
     prediction_inversed = scaler.inverse_transform(dummy)
     prediction_inversed_df = pd.DataFrame(prediction_inversed, columns=cols)
     return prediction_inversed_df
@@ -75,14 +76,14 @@ def plot_df(dates, stock_data: pd.DataFrame, pred_data_inversed_df: pd.DataFrame
     plt.figure(figsize=(16, 9))
     plt.plot(
         dates,
-        stock_data["Close"],
+        stock_data["UpDown"],
         color="green",
         marker=".",
         label="Original Close Price",
     )
     plt.plot(
         dates[seq_len:],
-        pred_data_inversed_df["Close"],
+        (pred_data_inversed_df["UpDown"] > 0.5).astype(int),
         color="blue",
         marker=".",
         linestyle="--",
@@ -98,7 +99,7 @@ def plot_df(dates, stock_data: pd.DataFrame, pred_data_inversed_df: pd.DataFrame
 
 def main():
     file = "001_삼성전자_005930"
-    file_path = f"csv/{file}.csv"
+    file_path = f"recent_data/{file}.csv"
     stock_data = pd.read_csv(file_path)
     idx, name, code = file.split("_")
     dates = pd.to_datetime(stock_data["Date"])

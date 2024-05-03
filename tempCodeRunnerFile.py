@@ -1,1 +1,0 @@
-plt.plot(stock_data["Date"], stock_data["RSI"], color="g", label="RSI", alpha=0.2)

@@ -34,10 +34,12 @@ def create_models(file: str):
         "MA60",
         "BB_Upper",
         "BB_Lower",
+        "ans",
     ]
 
     # 새로운 데이터프레임 생성 및 변수형변환
     stock_data = stock_data[cols].astype(float)
+    print(stock_data)
 
     # 데이터 정규화
     scaler = StandardScaler()
@@ -46,23 +48,24 @@ def create_models(file: str):
 
     # LSTM에 필요한 데이터 형식으로 재구성
     pred_days = 1
-    seq_len = 30
-    input_dim = len(cols)  # 새로운 input dimension
+    seq_len = 14
+    input_dim = len(cols) - 1  # 새로운 input dimension
 
     trainX, trainY = [], []
 
-    for i in range(seq_len, len(stock_data_scaled) - pred_days + 1):
-        trainX.append(stock_data_scaled[i - seq_len : i, :])
-        trainY.append(stock_data_scaled[i + pred_days - 1 : i + pred_days, 3])
+    for i in range(seq_len, len(stock_data_scaled) + 1):
+        trainX.append(stock_data_scaled[i - seq_len : i, :-1])
+        trainY.append(stock_data_scaled[i - 1 : i, -1])
 
     trainX, trainY = np.array(trainX), np.array(trainY)
+    print(trainX.shape, trainY.shape)
 
     # LSTM 모델 구축
     model = Sequential()
     model.add(Input(shape=(seq_len, input_dim)))
     model.add(LSTM(64, return_sequences=True))
     model.add(LSTM(32, return_sequences=False))
-    model.add(Dense(1))  # 예측하고자 하는 값은 'Close' 가격이므로 Dense(1) 사용
+    model.add(Dense(1))
 
     model.compile(optimizer=Adam(learning_rate=0.01), loss="mse")
 

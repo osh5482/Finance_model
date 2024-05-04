@@ -37,7 +37,7 @@ def file_process(stock_data: pd.DataFrame):
 
     # 새로운 데이터프레임 생성 및 변수형 변환
     stock_data = stock_data[cols].astype(float)
-
+    # stock_data = stock_data[-14:]
     # 데이터 정규화
     scaler.fit(stock_data)
     test_data_scaled = scaler.transform(stock_data)
@@ -48,7 +48,7 @@ def file_process(stock_data: pd.DataFrame):
         testX.append(test_data_scaled[i - seq_len : i, :])
 
     testX = np.array(testX)
-    print(testX.shape)
+
     return testX
 
 
@@ -68,7 +68,7 @@ def add_data(pred_data: np.ndarray):
     dummy[:, 3] = pred_data.reshape(-1)
     prediction_inversed = scaler.inverse_transform(dummy)
     prediction_inversed_df = pd.DataFrame(prediction_inversed, columns=cols)
-
+    print(prediction_inversed_df["Close"])
     return prediction_inversed_df
 
 
@@ -76,7 +76,7 @@ def plot_df(dates, stock_data: pd.DataFrame, pred_data_inversed_df: pd.DataFrame
     """실제 데이터와 예상 데이터를 plot"""
     plt.figure(figsize=(16, 9))
     plt.plot(
-        dates[:-1],
+        dates,
         stock_data["Close"],
         color="green",
         marker=".",
@@ -84,7 +84,7 @@ def plot_df(dates, stock_data: pd.DataFrame, pred_data_inversed_df: pd.DataFrame
     )
     plt.plot(
         dates[seq_len:],
-        pred_data_inversed_df["Close"],
+        pred_data_inversed_df["Close"].shift(1),
         color="blue",
         marker=".",
         linestyle="--",
@@ -121,6 +121,7 @@ def cal_direction(stock_data: pd.DataFrame, pred_data_inversed_df: pd.DataFrame)
     corr_diff = result_df[result_df["direction"] == 1]["diff"].mean()
     incorr_diff = result_df[result_df["direction"] != 1]["diff"].mean()
 
+    print(result_df)
     print(f"상승여부를 맞춘경우 예측값과 실체값의 오차: {corr_diff}")
     print(f"상승여부를 틀린경우 예측값과 실체값의 오차: {incorr_diff}")
     print(f"예측값과 실체값의 오차: {diff}")
@@ -153,23 +154,16 @@ def main():
 
     stock_data = pd.read_csv(file_path)
     idx, name, code = file.split("_")
-
+    # stock_data = stock_data[-15:]
     dates = pd.to_datetime(stock_data["Date"])
-
-    next_date = dates.iloc[-1] + datetime.timedelta(days=1)
-    dates = dates._append(pd.Series([next_date]))
-    print(dates)
 
     testX = file_process(stock_data)
     prediction = run_model(testX)
     pred_data_inversed_df = add_data(prediction)
 
-    print(stock_data["Close"])
-    print(pred_data_inversed_df["Close"])
-
-    result_df = cal_direction(stock_data, pred_data_inversed_df)
-    prob = cal_correct_prob(file, result_df)
-    plot_df(dates, stock_data, pred_data_inversed_df)
+    # result_df = cal_direction(stock_data, pred_data_inversed_df)
+    # prob = cal_correct_prob(file, result_df)
+    # plot_df(dates, stock_data, pred_data_inversed_df)
 
     return
 

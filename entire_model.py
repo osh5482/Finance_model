@@ -30,7 +30,7 @@ def create_models(file_paths: list):
         "MA60",
         "BB_Upper",
         "BB_Lower",
-        # "UpDown",
+        "ans",
     ]
 
     # LSTM에 필요한 데이터 형식으로 재구성
@@ -57,12 +57,12 @@ def create_models(file_paths: list):
 
     for file in file_paths:
         stock_data = pd.read_csv(file)
-        file = file[12:-4]
+        file = file[4:-4]
         idx, name, code = file.split("_")
 
         # 새로운 데이터프레임 생성 및 변수형 변환
         stock_data = stock_data[cols].astype(float)
-
+        print(stock_data)
         # 데이터 정규화
         scaler = StandardScaler()
         scaler = scaler.fit(stock_data)
@@ -71,11 +71,13 @@ def create_models(file_paths: list):
         trainX, trainY = [], []
 
         for i in range(seq_len, len(train_data_scaled) - pred_days + 1):
-            trainX.append(train_data_scaled[i - seq_len : i, :])
-            trainY.append(train_data_scaled[i + pred_days - 1 : i + pred_days, 3])
+            trainX.append(train_data_scaled[i - seq_len : i, :-1])
+            trainY.append(train_data_scaled[i : i + pred_days, -1])
 
+        print(len(trainX))
+        print(len(trainY))
         trainX, trainY = np.array(trainX), np.array(trainY)
-        # testX, testY = np.array(testX), np.array(testY)
+        print(trainX.shape, trainY.shape)
 
         print(f"{name} 학습 데이터: X = {trainX.shape}, Y = {trainY.shape}")
 
@@ -99,7 +101,7 @@ def create_models(file_paths: list):
 
 def main():
     start = time.perf_counter()
-    file_faths = glob.glob("post_corona/*.csv")
+    file_faths = glob.glob("csv/*.csv")
     create_models(file_faths)
     end = time.perf_counter()
     sec = end - start

@@ -1,7 +1,7 @@
 import FinanceDataReader as fdr
 import ta
 
-ks200 = fdr.DataReader("KS200", "2020-10-01", "2023-12-31")
+ks200 = fdr.DataReader("KS200", "2020-10-01")
 
 print(ks200)
 
@@ -27,10 +27,10 @@ ks200["MA20"] = ma20
 ks200["MA60"] = ma60
 ks200["BB_Upper"] = bb_upper
 ks200["BB_Lower"] = bb_lower
-ks200["UpDown"] = (ks200["Return"] > 0).astype(int)
+ks200["ans"] = ks200["Close"].shift(-1)
 
 # NaN값 제외를 위한 슬라이싱
-ks200 = ks200[60:-2]
+ks200 = ks200[60:-1]
 
 # 정리된 데이터프레임 csv로 저징
 ks200.to_csv(f"csv/000_KS200_000000.csv")

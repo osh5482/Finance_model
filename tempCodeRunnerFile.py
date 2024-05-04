@@ -1,1 +1,1 @@
-    print(result_df)
+    stock_data = stock_data[-14:]

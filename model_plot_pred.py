@@ -54,7 +54,7 @@ def file_process(stock_data: pd.DataFrame):
 
 def run_model(testX: np.ndarray):
     """정규화된 데이터를 모델에 입력해 예측값을 출력합니다"""
-    model = keras.models.load_model(f"keras_models/000_KS200_000000.keras")
+    model = keras.models.load_model(f"keras_models/000_KS200_past.keras")
     prediction = model.predict(testX)
 
     return prediction
@@ -117,14 +117,15 @@ def cal_direction(stock_data: pd.DataFrame, pred_data_inversed_df: pd.DataFrame)
         result_df["pred_diff"] * result_df["orig_diff"] > 0
     ).astype(int)
 
-    diff = result_df["diff"].mean()
-    corr_diff = result_df[result_df["direction"] == 1]["diff"].mean()
-    incorr_diff = result_df[result_df["direction"] == 0]["diff"].mean()
-    diff_per = result_df["diff"] / original_close
+    diff = result_df["diff"]
+    corr_diff = result_df[result_df["direction"] == 1]["diff"]
+    incorr_diff = result_df[result_df["direction"] == 0]["diff"]
+    result_df["diff_per"] = diff / original_close
+    diff_per = result_df["diff_per"]
 
-    print(f"상승여부를 맞춘경우 예측값과 실체값의 오차: {corr_diff}")
-    print(f"상승여부를 틀린경우 예측값과 실체값의 오차: {incorr_diff}")
-    print(f"예측값과 실체값의 오차: {diff}")
+    print(f"상승여부를 맞춘경우 예측값과 실체값의 오차: {corr_diff.mean()}")
+    print(f"상승여부를 틀린경우 예측값과 실체값의 오차: {incorr_diff.mean()}")
+    print(f"예측값과 실체값의 오차: {diff.mean()}")
     print(f"주가대비 오차율: {diff_per.mean()}")
     return result_df
 
@@ -148,7 +149,7 @@ def cal_correct_prob(file, result_df):
 
 
 def main():
-    file = "000_KS200_111111"
+    file = "000_KS200_2024"
     file_path = f"recent_data/{file}.csv"
     # paths = glob.glob("recent_data/*.csv")
     # csv_df = pd.DataFrame(columns=["code", "name", "prob"])
@@ -156,11 +157,11 @@ def main():
     stock_data = pd.read_csv(file_path)
     idx, name, code = file.split("_")
 
+    print(stock_data)
     dates = pd.to_datetime(stock_data["Date"])
 
     next_date = dates.iloc[-1] + datetime.timedelta(days=1)
     dates = dates._append(pd.Series([next_date]))
-    print(dates)
 
     testX = file_process(stock_data)
     prediction = run_model(testX)

@@ -35,8 +35,8 @@ def create_models(file_paths: list):
 
     # LSTM에 필요한 데이터 형식으로 재구성
     pred_days = 1
-    seq_len = 30
-    input_dim = len(cols)  # 새로운 input dimension
+    seq_len = 14
+    input_dim = len(cols) - 1  # 새로운 input dimension
 
     # LSTM 모델 구축
     model = Sequential()
@@ -60,26 +60,30 @@ def create_models(file_paths: list):
         file = file[4:-4]
         idx, name, code = file.split("_")
 
+        if idx == "000":
+            continue
+
         # 새로운 데이터프레임 생성 및 변수형 변환
         stock_data = stock_data[cols].astype(float)
-        print(stock_data)
+
         # 데이터 정규화
         scaler = StandardScaler()
         scaler = scaler.fit(stock_data)
-        train_data_scaled = scaler.transform(stock_data)
+        stock_data_scaled = scaler.transform(stock_data)
 
         trainX, trainY = [], []
 
-        for i in range(seq_len, len(train_data_scaled) - pred_days + 1):
-            trainX.append(train_data_scaled[i - seq_len : i, :-1])
-            trainY.append(train_data_scaled[i : i + pred_days, -1])
+        for i in range(seq_len, len(stock_data_scaled) + 1):
+            trainX.append(stock_data_scaled[i - seq_len : i, :-1])
+            trainY.append(stock_data_scaled[i - 1 : i, -1])
 
-        print(len(trainX))
-        print(len(trainY))
+        # print(len(trainX))
+        # print(len(trainY))
         trainX, trainY = np.array(trainX), np.array(trainY)
-        print(trainX.shape, trainY.shape)
 
-        print(f"{name} 학습 데이터: X = {trainX.shape}, Y = {trainY.shape}")
+        print(
+            f"{idx}번째 종목 {name} 학습 데이터: X = {trainX.shape}, Y = {trainY.shape}"
+        )
 
         history = model.fit(
             trainX,
@@ -95,7 +99,7 @@ def create_models(file_paths: list):
         print(f"{idx}번째 종목 {name} ({code}) 학습 완료")
 
         # 훈련 후 모델 저장
-    model.save(f"keras_models/000_entire_close_post.keras")
+    model.save(f"keras_models/000_entire_close.keras")
     print(f"모델 저장 완료")
 
 

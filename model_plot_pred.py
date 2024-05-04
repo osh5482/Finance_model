@@ -119,11 +119,13 @@ def cal_direction(stock_data: pd.DataFrame, pred_data_inversed_df: pd.DataFrame)
 
     diff = result_df["diff"].mean()
     corr_diff = result_df[result_df["direction"] == 1]["diff"].mean()
-    incorr_diff = result_df[result_df["direction"] != 1]["diff"].mean()
+    incorr_diff = result_df[result_df["direction"] == 0]["diff"].mean()
+    diff_per = result_df["diff"] / original_close
 
     print(f"상승여부를 맞춘경우 예측값과 실체값의 오차: {corr_diff}")
     print(f"상승여부를 틀린경우 예측값과 실체값의 오차: {incorr_diff}")
     print(f"예측값과 실체값의 오차: {diff}")
+    print(f"주가대비 오차율: {diff_per.mean()}")
     return result_df
 
 

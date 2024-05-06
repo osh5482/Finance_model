@@ -8,7 +8,7 @@ volume_zero_data = 0
 small_data = 0
 
 # json파일 로드 후 dict로 변환
-with open("kospi200_2020-01-01_2024-05-03.json", "r") as f:
+with open("kospi200_2023-10-01_2024-05-03.json", "r") as f:
     data = json.load(f)
 
 # dict의 values를 csv에 넣을 수 있도록 데이터프레임의 형태로 수정
@@ -26,7 +26,7 @@ for i, key in enumerate(data.keys()):
     stock_data = stock_data.set_index("Date")
 
     # 데이터 갯수가 200개 이하의 경우
-    if len(stock_data) <= 200:
+    if len(stock_data) <= 60:
         print(f"{i+1}번째 좀목: {name} : 데이터의 수가 200개 이하입니다.")
         small_data += 1
         continue  # 다음 종목으로 넘어감
@@ -72,7 +72,7 @@ for i, key in enumerate(data.keys()):
     stock_data = stock_data[60:-1]
 
     # 정리된 데이터프레임 csv로 저징
-    stock_data.to_csv(f"csv/{(saved_data+1):03}_{name}_{key}.csv")
+    # stock_data.to_csv(f"csv/{(saved_data+1):03}_{name}_{key}.csv")
     stock_data.to_csv(f"recent_data/{(saved_data+1):03}_{name}_{key}.csv")
     print(f"{i+1}번째 좀목: {name} 저장 완료")
     saved_data += 1

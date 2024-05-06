@@ -171,8 +171,25 @@ def main():
     print(pred_data_inversed_df["Close"])
 
     result_df = cal_direction(stock_data, pred_data_inversed_df)
-    prob = cal_correct_prob(file, result_df)
-    plot_df(dates, stock_data, pred_data_inversed_df)
+
+    # plot_df(dates, stock_data, pred_data_inversed_df)
+
+    # recent_stock = glob.glob("recent_data/*.csv")
+    # recent_stock = recent_stock[1:]
+    # entire_prob = [["stock", "probability"]]
+    # for stock in recent_stock:
+    #     stock_df = pd.read_csv(stock)
+    #     testX = file_process(stock_df)
+    #     prediction = run_model(testX)
+    #     pred_data_inversed_df = add_data(prediction)
+    #     result_df = cal_direction(stock_df, pred_data_inversed_df)
+    #     prob = cal_correct_prob(stock, result_df)
+    #     stock_name = stock[12:-4]
+    #     entire_prob.append([stock_name, prob])
+    # print(entire_prob)
+    # with open("entire_prob.csv", "w", newline="") as f:
+    #     writer = csv.writer(f)
+    #     writer.writerows(entire_prob)
 
     return
 

@@ -8,7 +8,7 @@ print(kospi200)
 stock_code = kospi200[["Name", "Code"]]
 print(stock_code)
 
-start = "2020-01-01"
+start = "2023-10-01"
 end = "2024-05-03"
 
 kospi200_dict = {}

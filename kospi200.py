@@ -1,7 +1,7 @@
 import FinanceDataReader as fdr
 import ta
 
-ks200 = fdr.DataReader("KS200", "2023-10-01")
+ks200 = fdr.DataReader("KS200", start="2010-01-01", end="2016-12-31")
 
 print(ks200)
 
@@ -33,5 +33,5 @@ ks200["ans"] = ks200["Close"].shift(-1)
 ks200 = ks200[60:-1]
 
 # 정리된 데이터프레임 csv로 저징
-ks200.to_csv(f"recent_data/000_KS200_2024.csv")
+ks200.to_csv(f"recent_data/000_KS200_2010-2016.csv")
 print(f"저장 완료")

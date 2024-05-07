@@ -1,0 +1,1 @@
+    plot_df(dates, stock_data, pred_data_inversed_df)

@@ -55,7 +55,7 @@ def file_process(stock_data: pd.DataFrame):
 
 def run_model(testX: np.ndarray):
     """정규화된 데이터를 모델에 입력해 예측값을 출력합니다"""
-    model = keras.models.load_model(f"keras_models/000_KS200_000000.keras")
+    model = keras.models.load_model(f"keras_models/000_KS200_000000_14.keras")
     prediction = model.predict(testX)
 
     return prediction

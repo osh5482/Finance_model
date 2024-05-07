@@ -46,7 +46,7 @@ def create_models(file: str):
 
     # LSTM에 필요한 데이터 형식으로 재구성
     pred_days = 1
-    seq_len = 30
+    seq_len = 14
     input_dim = len(cols)  # 새로운 input dimension
 
     trainX, trainY = [], []
@@ -75,7 +75,7 @@ def create_models(file: str):
         verbose=2,
     )
     # 훈련 후 모델 저장
-    model.save(f"keras_models/{idx}_{name}_{code}.keras")
+    model.save(f"keras_models/{idx}_{name}_{code}_14.keras")
     loss_data = history.history
     with open(f"models_loss/{idx}_{name}_{code}.json", "w") as f:
         json.dump(loss_data, f)

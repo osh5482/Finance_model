@@ -8,15 +8,15 @@ print(kospi200)
 stock_code = kospi200[["Name", "Code"]]
 print(stock_code)
 
-start = "2021-01-01"
-end = "2023-12-31"
+start = "2023-10-01"
+end = "2024-05-03"
 
 kospi200_dict = {}
 for i, rows in stock_code.iterrows():
     code = rows["Code"]
     name = rows["Name"]
     data = {}
-    df = fdr.DataReader(code, start, end)
+    df = fdr.DataReader(code, start)
     # print(df)
 
     df.index = df.index.strftime("%Y-%m-%d")

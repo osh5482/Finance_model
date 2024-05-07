@@ -1,1 +1,0 @@
-    # plt.yticks(stock_data["Close"])

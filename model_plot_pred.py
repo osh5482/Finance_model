@@ -27,7 +27,6 @@ cols = [
     "MA60",
     "BB_Upper",
     "BB_Lower",
-    # "UpDown",
 ]
 
 scaler = StandardScaler()
@@ -45,17 +44,17 @@ def file_process(stock_data: pd.DataFrame):
 
     testX = []
 
-    for i in range(seq_len, len(test_data_scaled) - pred_days + 1):
+    for i in range(seq_len, len(test_data_scaled) + 1):
         testX.append(test_data_scaled[i - seq_len : i, :])
+
     testX = np.array(testX)
     print(testX.shape)
-
     return testX
 
 
 def run_model(testX: np.ndarray):
     """정규화된 데이터를 모델에 입력해 예측값을 출력합니다"""
-    model = keras.models.load_model(f"keras_models/000_KS200_000000_14.keras")
+    model = keras.models.load_model(f"keras_models/000_KS200_past.keras")
     prediction = model.predict(testX)
 
     return prediction
@@ -64,12 +63,12 @@ def run_model(testX: np.ndarray):
 def add_data(pred_data: np.ndarray):
     """예측값을 역정규화해 기존 데이터셋에 추가합니다"""
     # 원본 스케일로 역정규화
-    print(pred_data.shape)
 
     dummy = np.zeros((len(pred_data), scaler.scale_.shape[0]))
     dummy[:, 3] = pred_data.reshape(-1)
     prediction_inversed = scaler.inverse_transform(dummy)
     prediction_inversed_df = pd.DataFrame(prediction_inversed, columns=cols)
+
     return prediction_inversed_df
 
 
@@ -77,7 +76,7 @@ def plot_df(dates, stock_data: pd.DataFrame, pred_data_inversed_df: pd.DataFrame
     """실제 데이터와 예상 데이터를 plot"""
     plt.figure(figsize=(16, 9))
     plt.plot(
-        dates,
+        dates[:-1],
         stock_data["Close"],
         color="green",
         marker=".",
@@ -118,13 +117,16 @@ def cal_direction(stock_data: pd.DataFrame, pred_data_inversed_df: pd.DataFrame)
         result_df["pred_diff"] * result_df["orig_diff"] > 0
     ).astype(int)
 
-    diff = result_df["diff"].mean()
-    corr_diff = result_df[result_df["direction"] == 1]["diff"].mean()
-    incorr_diff = result_df[result_df["direction"] != 1]["diff"].mean()
+    diff = result_df["diff"]
+    corr_diff = result_df[result_df["direction"] == 1]["diff"]
+    incorr_diff = result_df[result_df["direction"] == 0]["diff"]
+    result_df["diff_per"] = diff / original_close
+    diff_per = result_df["diff_per"]
 
-    print(f"상승여부를 맞춘경우 예측값과 실체값의 오차: {corr_diff}")
-    print(f"상승여부를 틀린경우 예측값과 실체값의 오차: {incorr_diff}")
-    print(f"예측값과 실체값의 오차: {diff}")
+    print(f"상승여부를 맞춘경우 예측값과 실체값의 오차: {corr_diff.mean()}")
+    print(f"상승여부를 틀린경우 예측값과 실체값의 오차: {incorr_diff.mean()}")
+    print(f"예측값과 실체값의 오차: {diff.mean()}")
+    print(f"주가대비 오차율: {diff_per.mean()}")
     return result_df
 
 
@@ -147,22 +149,47 @@ def cal_correct_prob(file, result_df):
 
 
 def main():
-    file = "000_KS200_000000"
+    file = "000_KS200_2024"
     file_path = f"recent_data/{file}.csv"
     # paths = glob.glob("recent_data/*.csv")
     # csv_df = pd.DataFrame(columns=["code", "name", "prob"])
 
     stock_data = pd.read_csv(file_path)
     idx, name, code = file.split("_")
+
+    print(stock_data)
     dates = pd.to_datetime(stock_data["Date"])
+
+    next_date = dates.iloc[-1] + datetime.timedelta(days=1)
+    dates = dates._append(pd.Series([next_date]))
 
     testX = file_process(stock_data)
     prediction = run_model(testX)
     pred_data_inversed_df = add_data(prediction)
 
+    print(stock_data["Close"])
+    print(pred_data_inversed_df["Close"])
+
     result_df = cal_direction(stock_data, pred_data_inversed_df)
-    prob = cal_correct_prob(file, result_df)
-    plot_df(dates, stock_data, pred_data_inversed_df)
+
+    # plot_df(dates, stock_data, pred_data_inversed_df)
+
+    # recent_stock = glob.glob("recent_data/*.csv")
+    # recent_stock = recent_stock[1:]
+    # entire_prob = [["stock", "probability"]]
+    # for stock in recent_stock:
+    #     stock_df = pd.read_csv(stock)
+    #     testX = file_process(stock_df)
+    #     prediction = run_model(testX)
+    #     pred_data_inversed_df = add_data(prediction)
+    #     result_df = cal_direction(stock_df, pred_data_inversed_df)
+    #     prob = cal_correct_prob(stock, result_df)
+    #     stock_name = stock[12:-4]
+    #     entire_prob.append([stock_name, prob])
+    # print(entire_prob)
+    # with open("entire_prob.csv", "w", newline="") as f:
+    #     writer = csv.writer(f)
+    #     writer.writerows(entire_prob)
 
     return
 

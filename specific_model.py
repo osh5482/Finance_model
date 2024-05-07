@@ -80,15 +80,15 @@ def create_models(file: str):
     # 훈련 후 모델 저장
     model.save(f"keras_models/{idx}_{name}_{code}.keras")
     loss_data = history.history
-    with open(f"models_loss/{idx}_{name}_{code}.json", "w") as f:
-        json.dump(loss_data, f)
+    # with open(f"models_loss/{idx}_{name}_{code}.json", "w") as f:
+    #     json.dump(loss_data, f)
 
     print(f"{idx}_{name}_{code} 모델 및 loss 저장 완료")
 
 
 def main():
     start = time.perf_counter()
-    file_faths = glob.glob("csv/*.csv")
+    file_faths = glob.glob("csv/000_KS200_000000.csv")
     for file in file_faths:
         create_models(file)
     end = time.perf_counter()

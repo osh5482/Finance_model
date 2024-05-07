@@ -29,7 +29,10 @@ cols = [
     "BB_Lower",
 ]
 
+stock_data = pd.read_csv("csv/000_KS200_000000.csv")
+stock_data = stock_data[cols].astype(float)
 scaler = StandardScaler()
+scaler = scaler.fit(stock_data)
 
 
 def file_process(stock_data: pd.DataFrame):
@@ -39,7 +42,7 @@ def file_process(stock_data: pd.DataFrame):
     stock_data = stock_data[cols].astype(float)
 
     # 데이터 정규화
-    scaler.fit(stock_data)
+    # scaler.fit(stock_data)
     test_data_scaled = scaler.transform(stock_data)
 
     testX = []
@@ -54,7 +57,7 @@ def file_process(stock_data: pd.DataFrame):
 
 def run_model(testX: np.ndarray):
     """정규화된 데이터를 모델에 입력해 예측값을 출력합니다"""
-    model = keras.models.load_model(f"keras_models/000_KS200_past.keras")
+    model = keras.models.load_model(f"keras_models/000_KS200_000000.keras")
     prediction = model.predict(testX)
 
     return prediction
@@ -149,15 +152,17 @@ def cal_correct_prob(file, result_df):
 
 
 def main():
-    file = "000_KS200_2024"
+    file = "000_KS200_project"
     file_path = f"recent_data/{file}.csv"
     # paths = glob.glob("recent_data/*.csv")
     # csv_df = pd.DataFrame(columns=["code", "name", "prob"])
 
     stock_data = pd.read_csv(file_path)
+    # stock_data = stock_data[:-1]
+
     idx, name, code = file.split("_")
 
-    print(stock_data)
+    # print(stock_data)
     dates = pd.to_datetime(stock_data["Date"])
 
     next_date = dates.iloc[-1] + datetime.timedelta(days=1)
@@ -171,8 +176,9 @@ def main():
     print(pred_data_inversed_df["Close"])
 
     result_df = cal_direction(stock_data, pred_data_inversed_df)
+    prob = cal_correct_prob(file, result_df)
 
-    # plot_df(dates, stock_data, pred_data_inversed_df)
+    plot_df(dates, stock_data, pred_data_inversed_df)
 
     # recent_stock = glob.glob("recent_data/*.csv")
     # recent_stock = recent_stock[1:]

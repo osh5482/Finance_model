@@ -1,1 +1,1 @@
-    stock_data = stock_data[-14:]
+    plot_df(dates, stock_data, pred_data_inversed_df)

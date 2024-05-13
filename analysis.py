@@ -2,6 +2,8 @@ import pandas as pd
 import ta
 import json
 import numpy as np
+import ta.momentum
+import ta.trend
 
 saved_data = 0
 volume_zero_data = 0

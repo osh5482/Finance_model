@@ -7,6 +7,7 @@ import keras
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 import matplotlib.pyplot as plt
 
+
 plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rcParams["axes.unicode_minus"] = False
 
@@ -28,11 +29,19 @@ cols = [
     "BB_Upper",
     "BB_Lower",
 ]
+<<<<<<< HEAD
 
 stock_data = pd.read_csv("csv/000_KS200_000000.csv")
 stock_data = stock_data[cols].astype(float)
 scaler = StandardScaler()
 scaler = scaler.fit(stock_data)
+=======
+past = "000_KS200_111111"
+scaler = StandardScaler()
+past = pd.read_csv(f"csv/{past}.csv")
+past = past[cols].astype(float)
+scaler = scaler.fit(past)
+>>>>>>> 48ecbfaa14c713120198a267d0ea4bd498b6265a
 
 
 def file_process(stock_data: pd.DataFrame):

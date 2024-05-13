@@ -1,10 +1,10 @@
 import FinanceDataReader as fdr
 import ta
 
-# 학습용
+# 추가 학습용
 ks200 = fdr.DataReader("KS200", "2020-01-01")
 
-# # 테스트용
+# # 프로젝트용
 # ks200 = fdr.DataReader("KS200", "2023-10-01")
 
 print(ks200)
@@ -34,14 +34,15 @@ ks200["BB_Lower"] = bb_lower
 ks200["ans"] = ks200["Close"].shift(-1)
 
 # NaN값 제외를 위한 슬라이싱 (학습용은 -1붙이기)
+# 프로젝트용 [60:]
 ks200 = ks200[60:-1]
 
 
-# 프로젝트용
-# ks200.to_csv(f"recent_data/000_KS200_project.csv")
-
 # 학습용
 ks200.to_csv(f"csv/000_KS200_000000.csv")
+
+# # 프로젝트용
+# ks200.to_csv(f"recent_data/000_KS200_project.csv")
 
 
 print(f"저장 완료")

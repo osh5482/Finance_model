@@ -79,7 +79,8 @@ def create_models(file: str):
     )
     # 훈련 후 모델 저장
     model.save(f"keras_models/{idx}_{name}_{code}.keras")
-    loss_data = history.history
+
+    # loss_data = history.history
     # with open(f"models_loss/{idx}_{name}_{code}.json", "w") as f:
     #     json.dump(loss_data, f)
 

@@ -147,7 +147,7 @@ def cal_correct_prob(file, result_df):
 
 
 def main():
-    file = "000_KS200_111111"
+    file = "000_KS200_project"
     file_path = f"recent_data/{file}.csv"
     # paths = glob.glob("recent_data/*.csv")
     # csv_df = pd.DataFrame(columns=["code", "name", "prob"])
@@ -163,7 +163,7 @@ def main():
 
     # result_df = cal_direction(stock_data, pred_data_inversed_df)
     # prob = cal_correct_prob(file, result_df)
-    # plot_df(dates, stock_data, pred_data_inversed_df)
+    plot_df(dates, stock_data, pred_data_inversed_df)
 
     return
 

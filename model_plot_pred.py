@@ -28,20 +28,17 @@ cols = [
     "MA60",
     "BB_Upper",
     "BB_Lower",
+    "Return_SnP",
 ]
-<<<<<<< HEAD
 
 stock_data = pd.read_csv("csv/000_KS200_000000.csv")
+SnP_data = pd.read_csv("csv/000_SnP500_000000.csv")
+stock_data = pd.merge(stock_data, SnP_data[["Date", "Return"]], on="Date", how="left")
+stock_data = stock_data.rename(columns={"Return_y": "Return_SnP", "Return_x": "Return"})
+stock_data["Return_SnP"] = stock_data["Return_SnP"].fillna(method="ffill")
 stock_data = stock_data[cols].astype(float)
 scaler = StandardScaler()
 scaler = scaler.fit(stock_data)
-=======
-past = "000_KS200_111111"
-scaler = StandardScaler()
-past = pd.read_csv(f"csv/{past}.csv")
-past = past[cols].astype(float)
-scaler = scaler.fit(past)
->>>>>>> 48ecbfaa14c713120198a267d0ea4bd498b6265a
 
 
 def file_process(stock_data: pd.DataFrame):
@@ -66,7 +63,7 @@ def file_process(stock_data: pd.DataFrame):
 
 def run_model(testX: np.ndarray):
     """정규화된 데이터를 모델에 입력해 예측값을 출력합니다"""
-    model = keras.models.load_model(f"keras_models/000_KS200_000000.keras")
+    model = keras.models.load_model(f"keras_models/000_KS200_000000_add_SnP.keras")
     prediction = model.predict(testX)
 
     return prediction
@@ -167,6 +164,14 @@ def main():
     # csv_df = pd.DataFrame(columns=["code", "name", "prob"])
 
     stock_data = pd.read_csv(file_path)
+    SnP_data = pd.read_csv("recent_data/000_SnP500_project.csv")
+    stock_data = pd.merge(
+        stock_data, SnP_data[["Date", "Return"]], on="Date", how="left"
+    )
+    stock_data = stock_data.rename(
+        columns={"Return_y": "Return_SnP", "Return_x": "Return"}
+    )
+    stock_data["Return_SnP"] = stock_data["Return_SnP"].fillna(method="ffill")
     # stock_data = stock_data[:-1]
 
     idx, name, code = file.split("_")

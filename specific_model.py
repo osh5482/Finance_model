@@ -16,8 +16,18 @@ tf.random.set_seed(42)
 
 def create_models(file: str):
     stock_data = pd.read_csv(file)
+    SnP_data = pd.read_csv("csv/000_SnP500_000000.csv")
     file = file[4:-4]
     idx, name, code = file.split("_")
+
+    # stock_data["SnP"] = SnP_data["Close"]
+    stock_data = pd.merge(
+        stock_data, SnP_data[["Date", "Return"]], on="Date", how="left"
+    )
+    stock_data = stock_data.rename(
+        columns={"Return_y": "Return_SnP", "Return_x": "Return"}
+    )
+    stock_data["Return_SnP"] = stock_data["Return_SnP"].fillna(method="ffill")
 
     cols = [
         "Open",
@@ -34,6 +44,7 @@ def create_models(file: str):
         "MA60",
         "BB_Upper",
         "BB_Lower",
+        "Return_SnP",
         "ans",
     ]
 
@@ -78,13 +89,9 @@ def create_models(file: str):
         verbose=2,
     )
     # 훈련 후 모델 저장
-    model.save(f"keras_models/{idx}_{name}_{code}.keras")
+    model.save(f"keras_models/{idx}_{name}_{code}_add_SnP.keras")
 
-    # loss_data = history.history
-    # with open(f"models_loss/{idx}_{name}_{code}.json", "w") as f:
-    #     json.dump(loss_data, f)
-
-    print(f"{idx}_{name}_{code} 모델 및 loss 저장 완료")
+    print(f"{idx}_{name}_{code} 모델 저장 완료")
 
 
 def main():

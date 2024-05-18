@@ -1,15 +1,11 @@
 import FinanceDataReader as fdr
 import ta
 
-<<<<<<< HEAD
-# 추가 학습용
+# 학습용
 ks200 = fdr.DataReader("KS200", "2020-01-01")
 
 # # 프로젝트용
 # ks200 = fdr.DataReader("KS200", "2023-10-01")
-=======
-ks200 = fdr.DataReader("KS200", start="2010-01-01", end="2016-12-31")
->>>>>>> 48ecbfaa14c713120198a267d0ea4bd498b6265a
 
 print(ks200)
 

@@ -84,7 +84,7 @@ def create_models(file: str):
         trainX,
         trainY,
         epochs=32,
-        batch_size=256,
+        batch_size=512,
         validation_split=0.1,
         verbose=2,
     )
